@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Neural Time Machine: Gate to Mars — DavidGomadza (UTC Live)</title>
+<style>
+  :root{
+    --white:#ffffff;
+    --blue-start:#e6f3ff;
+    --blue-end:#88c6ff;
+    --panel:#f8fcff;
+    --muted:#5b6f85;
+    --accent:#0b6fff;
+    --accent2:#8b5cf6;
+    --ok:#10b981;
+    --danger:#ef4444;
+    --glass: rgba(255,255,255,0.7);
+    --primary: #00ff88;
+    --secondary: #0f3460;
+    --dark: #1a1a2e;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,var(--white) 0%, var(--blue-start) 35%, var(--blue-end) 100%);color:#062033}
+  .app{display:grid;grid-template-columns:1fr 380px;gap:14px;padding:18px;height:100vh;box-sizing:border-box}
+  header{grid-column:1/-1;display:flex;align-items:center;gap:12px}
+  .logo{width:60px;height:60px;border-radius:12px;background:linear-gradient(135deg,#0b6fff,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:18px}
+  h1{margin:0;font-size:20px}
+  .subtitle{font-size:12px;color:var(--muted)}
+  .main{background:rgba(255,255,255,0.95);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 30px rgba(9,30,63,0.08)}
+  .panel{background:#ffffff;border-radius:10px;padding:10px;border:1px solid rgba(6,32,58,0.06)}
+  input[type=text],select,textarea{padding:8px;border-radius:8px;border:1px solid rgba(6,32,58,0.08);background:transparent;color:inherit;font-size:13px}
+  button{padding:8px 10px;border-radius:8px;border:0;background:var(--accent);color:white;cursor:pointer;font-weight:600}
+  .small{font-size:12px;color:var(--muted)}
+  svg{max-width:100%;height:56vh;background:transparent}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  .log{height:220px;overflow:auto;padding:8px;background:linear-gradient(180deg,#f1f8ff,#ffffff);border-radius:8px;font-family:monospace;font-size:13px;color:#0b3350}
+  .messages{height:34vh;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:8px;background:linear-gradient(180deg,#f8feff,#ffffff);border-radius:8px}
+  .contacts{height:22vh;overflow:auto;display:flex;flex-direction:column;gap:8px}
+  .contact{padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(6,32,58,0.04);cursor:pointer}
+  .status-ok{color:var(--ok);font-weight:700}
+  .status-bad{color:var(--danger);font-weight:700}
+  .coord{font-family:monospace;font-size:13px;color:#0b3350}
+  footer{grid-column:1/-1;padding:8px 18px;color:var(--muted)}
+  .ajx-badge{padding:6px 10px;border-radius:10px;font-weight:700;background:linear-gradient(90deg,#ffd36b,#ff8ba6);color:#082937}
+  @media(max-width:1000px){ .app{grid-template-columns:1fr; } svg{height:46vh} }
+  @keyframes diamondSpin { from{ transform: rotate(0deg) } to{ transform: rotate(360deg) } }
+  .diamond.spin { animation: diamondSpin 3s linear infinite; transform-origin:center; }
+  .portal-shimmer { opacity:0; transition:opacity 500ms ease; }
+  .portal-open .portal-shimmer { opacity:1; }
+  .top-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+  .clock { font-weight:700; color:#053a66; background:linear-gradient(90deg,#e8f6ff,#ffffff); padding:6px 10px; border-radius:8px; border:1px solid rgba(6,32,58,0.04) }
+  .go-to { display:flex; gap:8px; align-items:center; }
+
+  /* Brain Reader Panel */
+  .brain-panel {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--secondary) 100%);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 15px;
+    font-family: 'Courier New', monospace;
+  }
+  .brain-panel h3 {
+    margin-bottom: 12px;
+    color: var(--primary);
+    text-align: center;
+  }
+  .codec-input {
+    width: 100%;
+    background: #000;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+  }
+  .codec-btn {
+    background: linear-gradient(45deg, var(--primary), #00cc66);
+    color: #000;
+    border: none;
+    padding: 6px 10px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 3px;
+    font-family: 'Courier New', monospace;
+    border-radius: 5px;
+    font-size: 12px;
+  }
+  .brain-terminal {
+    background: #000;
+    color: var(--primary);
+    padding: 8px;
+    font-size: 11px;
+    height: 100px;
+    overflow-y: auto;
+    border: 1px solid var(--primary);
+    margin-top: 10px;
+    border-radius: 5px;
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">TM</div>
+      <div style="flex:1">
+        <h1>Neural Time Machine: Gate to Mars</h1>
+        <div class="subtitle">Thought-controlled temporal & planetary travel — DavidGomadza system</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <div class="small">Price: <strong>8 BTC (AGT / BTCGT)</strong> or <strong>US$100</strong></div>
+        <div class="ajx-badge">AJX Booking — 8 days</div>
+      </div>
+    </header>
+
+    <!-- LEFT: Main Gate & Time Controls -->
+    <main class="main">
+      <!-- TOP: live UTC clock + Go-to-Year inputs -->
+      <div class="top-controls">
+        <div class="clock" id="utcClock">UTC: --/--/----  --:--:--.---</div>
+
+        <div class="go-to">
+          <label class="small">Go-to Date (DD/MM/YYYY)</label>
+          <input id="gotoDate" type="text" placeholder="00/00/0000" style="width:140px"/>
+        </div>
+
+        <div class="go-to">
+          <label class="small">Time (HH.MM.SS.ms)</label>
+          <input id="gotoTime" type="text" placeholder="00.00.00.000" style="width:140px"/>
+        </div>
+
+        <button id="applyGoTo" style="background:#06a6ff">Apply Go-to → set Arrival</button>
+
+        <div style="margin-left:auto" class="small">Owner: <strong>DavidGomadza</strong></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+        <div>
+          <div class="small">Gate Coordinates</div>
+          <div class="coord" id="gateCoords">000777777777777777777777777777777777777777777777777789000086789028486789028678902888678902841867890286</div>
+          <div class="small" style="margin-top:6px">Position: <span class="coord">0.382867800018678 , 0.00000086789028678980</span></div>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="small">Access: <span id="accessLabel" class="status-bad">Operator-only</span></div>
+          <input id="authKey" type="text" placeholder="present authorization key (owner only)" style="width:260px"/>
+          <button id="presentKeyBtn">Present</button>
+        </div>
+      </div>
+
+      <!-- Gate SVG -->
+      <div style="display:flex;justify-content:center;align-items:center">
+        <svg id="gateSVG" viewBox="-520 -520 1040 1040" aria-label="Time Gate">
+          <defs>
+            <radialGradient id="portalGrad" cx="50%" cy="40%">
+              <stop offset="0%" stop-color="#fff7" />
+              <stop offset="40%" stop-color="#e6f7ff" />
+              <stop offset="100%" stop-color="#cfeaff" stop-opacity="0.95" />
+            </radialGradient>
+            <filter id="softGlow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+
+          <g transform="translate(0,220)"><ellipse rx="330" ry="60" fill="rgba(6,32,58,0.06)"/></g>
+          <g id="outerGimbal" class="gimbal"><circle r="360" fill="none" stroke="#cfeaff" stroke-width="18" opacity="0.25"/></g>
+          <g id="diamondRing"></g>
+
+          <g id="portalGroup">
+            <circle r="140" fill="url(#portalGrad)" stroke="#9fd6ff" stroke-width="6"/>
+            <g id="magLining"><circle r="142" fill="none" stroke="#7b5aff" stroke-width="4" stroke-dasharray="6 8" opacity="0.7"/></g>
+            <g id="portalShimmer" class="portal-shimmer">
+              <path d="M-80 0 A80 80 0 1 1 80 0 A80 80 0 1 1 -80 0" fill="none" stroke="#7dd3fc" stroke-width="3" opacity="0.6"/>
+            </g>
+            <g id="marsPlate" transform="translate(0,0)" style="cursor:pointer">
+              <circle r="48" fill="#ffffff" stroke="#9fd6ff" stroke-width="3"/>
+              <circle r="36" fill="transparent" stroke="#91a7c1" stroke-width="2"/>
+              <text x="0" y="6" fill="#062033" font-size="11" text-anchor="middle" font-weight="700">MARS PLATE</text>
+            </g>
+          </g>
+          <g transform="translate(0,260)"><ellipse rx="86" ry="40" fill="#f0fbff" stroke="#cfeaff" stroke-width="6"/><text x="0" y="6" fill="#0b3b57" font-size="12" text-anchor="middle">SOUTH ENTRANCE</text></g>
+        </svg>
+      </div>
+
+      <!-- Time controls -->
+      <div class="panel">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <div style="flex:1">
+            <div class="small">Select travel mode</div>
+            <select id="modeSelect" style="width:100%;margin-top:6px">
+              <option value="past">Go back 78,000,000,000 years</option>
+              <option value="future">Go forward 78,000,000,000 years</option>
+              <option value="custom">Custom years offset</option>
+            </select>
+          </div>
+
+          <div style="width:220px">
+            <div class="small">Longago minimum (seconds)</div>
+            <input id="longagoSec" type="text" value="12" style="width:100%;margin-top:6px"/>
+            <div class="small" style="margin-top:6px">If accompanied by DavidGomadza, full calibration is allowed.</div>
+          </div>
+
+          <div style="width:200px">
+            <div class="small">Price</div>
+            <div style="margin-top:6px;font-weight:700">8 BTC (AGT/BTCGT) or US$100</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:12px;align-items:center">
+          <div style="flex:1">
+            <label class="small">Departure year (signed integer; negative = years BCE)</label>
+            <input id="depYear" type="text" placeholder="-78902867890" style="width:100%;margin-top:6px"/>
+          </div>
+          <div style="flex:1">
+            <label class="small">Arrival year (signed integer)</label>
+            <input id="arrYear" type="text" placeholder="7890867890" style="width:100%;margin-top:6px"/>
+          </div>
+          <div style="width:230px">
+            <label class="small">Calibration velocity (years/sec)</label>
+            <input id="vel" type="text" value="1" style="width:100%;margin-top:6px"/>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+          <button id="calibrateBtn" style="background:#0b6fff">Calibrate & Start Time Warp</button>
+          <button id="stopBtn" style="background:var(--danger)">Abort</button>
+          <div style="flex:1" class="small">Exact date display will show high-precision year values; when within JS Date range, calendar date/time is shown.</div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:12px;align-items:center">
+          <div class="panel" style="min-width:220px">
+            <div class="small">Time Calibration Velocity</div>
+            <div id="velDisplay" style="font-weight:800;margin-top:6px">— years/sec</div>
+          </div>
+          <div class="panel">
+            <div class="small">Departure</div>
+            <div id="depDisplay" style="font-weight:800;margin-top:6px">—</div>
+            <div class="small" style="margin-top:6px">Arrival</div>
+            <div id="arrDisplay" style="font-weight:800;margin-top:6px">—</div>
+          </div>
+          <div class="panel" style="width:240px">
+            <div class="small">Time Calibration Range</div>
+            <div style="margin-top:6px">From <span class="coord">-78902867890</span> to <span class="coord">7890867890</span> years (expandable)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BRAIN READER INTEGRATION -->
+      <div class="brain-panel">
+        <h3>🧠 CNB Wearable Brain Reader</h3>
+        <p style="font-size:12px; margin-bottom:10px;">Calibration phrase: <em>“My voice is my password.”</em> Captures thoughts from right temple (Exit Point).</p>
+        
+        <input type="text" class="codec-input" id="brainInput" placeholder="Enter thought for neural processing...">
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          <button class="codec-btn" onclick="processThought()">PROCESS THOUGHT</button>
+          <button class="codec-btn" onclick="calibrateBrain()">CALIBRATE</button>
+          <button class="codec-btn" onclick="sendToTimeMachine()">SEND TO TIME MACHINE</button>
+        </div>
+        
+        <div class="brain-terminal" id="brainTerminal">
+          > CNB System ready<br>
+          > Say "My voice is my password" to calibrate<br>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px">
+        <div class="panel" style="flex:1">
+          <div class="small">Operator log</div>
+          <div id="opLog" class="log" style="margin-top:8px">System ready.</div>
+        </div>
+
+        <div class="panel" style="width:360px">
+          <div class="small">Action</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="standBtn">Stand on Plate</button>
+            <button id="sayBtn">Say "agt"</button>
+            <button id="transitBtn" style="background:#0b6fff">Execute Transit</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT: AugVT + Mars inbox + WebRTC -->
+    <aside>
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>AugVT Console</strong></div>
+          <div class="small">Communication</div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="contactName" type="text" placeholder="New contact name" style="flex:1"/>
+          <button id="addContact">Add</button>
+        </div>
+
+        <div class="contacts" id="contacts"></div>
+
+        <div style="margin-top:8px" class="small">My Share Token</div>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <input id="myToken" type="text" readonly/>
+          <button id="regenToken">Regenerate</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Chat</strong> (<span id="curContact">(none)</span>)</div>
+          <div class="small">Send → Mars</div>
+        </div>
+        <div id="messages" class="messages" style="margin-top:8px"></div>
+
+        <div class="composer" style="margin-top:8px">
+          <input id="msgInput" type="text" placeholder="Type message"/>
+          <button id="sendBtn">Send</button>
+          <button id="sendMars">Send→Mars</button>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button id="startCall">Call</button>
+          <button id="endCall" style="background:#ddd;color:#062033">End</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Mars Inbox</strong></div><div class="small">Auto-reply</div>
+        </div>
+        <div id="marsInbox" class="log" style="margin-top:8px;height:160px">No messages queued to Mars.</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="startMarsClient">Start Mars Client</button>
+          <button id="checkReplies">Check Replies</button>
+          <button id="clearInbox">Clear</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Manual WebRTC</strong></div>
+          <div class="small">copy/paste SDP</div>
+        </div>
+        <div style="margin-top:8px">
+          <div style="display:flex;gap:8px"><button id="createOffer">Create Offer</button><button id="acceptOffer">Accept Offer</button><button id="acceptAnswer">Accept Answer</button></div>
+          <textarea id="sdpOffer" placeholder="Offer / Answer" style="width:100%;height:80px;margin-top:8px"></textarea>
+          <textarea id="sdpAnswer" placeholder="Answer" style="width:100%;height:80px;margin-top:8px"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="sendDataTest" style="background:#8b5cf6">Send DC Test</button>
+            <audio id="remoteAudio" controls style="width:180px"></audio>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <footer>
+      Time Machine: longago minimum 12s unless accompanied by DavidGomadza. Use responsibly.
+    </footer>
+  </div>
+
+<script>
+/* Unified System: Real-Time Time Machine + CNB Brain Reader */
+// ---------- small helpers ----------
+function nowUTCParts(){
+  const d = new Date();
+  return {
+    year: d.getUTCFullYear(),
+    month: d.getUTCMonth() + 1,
+    date: d.getUTCDate(),
+    hours: d.getUTCHours(),
+    minutes: d.getUTCMinutes(),
+    seconds: d.getUTCSeconds(),
+    ms: d.getUTCMilliseconds()
+  };
+}
+function pad(n, len=2){ n = n.toString(); while(n.length < len) n = '0' + n; return n; }
+function formatDDMMYYYY(parts){
+  return pad(parts.date,2) + '/' + pad(parts.month,2) + '/' + pad(parts.year,4);
+}
+function formatTimeHHMMSSms(parts){
+  return pad(parts.hours,2) + '.' + pad(parts.minutes,2) + '.' + pad(parts.seconds,2) + '.' + pad(parts.ms,3);
+}
+
+function updateUTCClockAndPrefill(){
+  const parts = nowUTCParts();
+  const utcText = 'UTC: ' + formatDDMMYYYY(parts) + '  ' + pad(parts.hours,2) + ':' + pad(parts.minutes,2) + ':' + pad(parts.seconds,2) + '.' + pad(parts.ms,3);
+  const clockEl = document.getElementById('utcClock');
+  if(clockEl) clockEl.textContent = utcText;
+
+  if(!window._gotoPrefilled){
+    const gotoDateEl = document.getElementById('gotoDate');
+    const gotoTimeEl = document.getElementById('gotoTime');
+    if(gotoDateEl && !gotoDateEl.value) gotoDateEl.value = formatDDMMYYYY(parts);
+    if(gotoTimeEl && !gotoTimeEl.value) gotoTimeEl.value = formatTimeHHMMSSms(parts);
+    const depEl = document.getElementById('depYear');
+    const arrEl = document.getElementById('arrYear');
+    if(depEl && !depEl.value) depEl.value = '0';
+    if(arrEl && !arrEl.value) arrEl.value = '7890867890';
+    window._gotoPrefilled = true;
+  }
+}
+
+(function startClock(){
+  updateUTCClockAndPrefill();
+  setInterval(updateUTCClockAndPrefill, 1000);
+})();
+
+// ---------- Apply Go-to ----------
+document.getElementById('applyGoTo').addEventListener('click', ()=>{
+  const dateStr = document.getElementById('gotoDate').value.trim();
+  const timeStr = document.getElementById('gotoTime').value.trim();
+  if(!dateStr || !timeStr){ alert('Provide both date and time'); return; }
+  const dateParts = dateStr.split('/');
+  if(dateParts.length !== 3){ alert('Date format must be DD/MM/YYYY'); return; }
+  const dd = parseInt(dateParts[0],10), mm = parseInt(dateParts[1],10), yyyy = parseInt(dateParts[2],10);
+  if(isNaN(dd)||isNaN(mm)||isNaN(yyyy)){ alert('Invalid date'); return; }
+  const tParts = timeStr.split('.');
+  if(tParts.length < 3){ alert('Time format must be HH.MM.SS.ms'); return; }
+  const hh = parseInt(tParts[0],10), min = parseInt(tParts[1],10), ss = parseInt(tParts[2],10), ms = parseInt(tParts[3]||'0',10);
+  if([hh,min,ss,ms].some(v=>isNaN(v))){ alert('Invalid time'); return; }
+
+  let arrivalYearLabel = '';
+  try {
+    const utcMillis = Date.UTC(yyyy, mm-1, dd, hh, min, ss, ms);
+    const arrivalDate = new Date(utcMillis);
+    arrivalYearLabel = yyyy + ' (UTC ' + arrivalDate.toUTCString() + ')';
+  } catch(e){
+    arrivalYearLabel = yyyy.toString();
+  }
+
+  document.getElementById('arrYear').value = String(yyyy);
+  document.getElementById('arrDisplay').textContent = arrivalYearLabel;
+  document.getElementById('velDisplay').textContent = (document.getElementById('vel').value || '1') + ' years/sec';
+  const opLog = document.getElementById('opLog');
+  opLog.textContent = '[' + new Date().toUTCString() + '] Go-to set to ' + dateStr + ' ' + timeStr + '\n' + opLog.textContent;
+  alert('Go-to date applied: ' + dateStr + ' ' + timeStr);
+});
+
+// ---------- Authorization ----------
+const PRESENT_KEY_BTN = document.getElementById('presentKeyBtn');
+const AUTH_KEY_INPUT = document.getElementById('authKey');
+const ACCESS_LABEL = document.getElementById('accessLabel');
+let ownerAuthorized = false;
+PRESENT_KEY_BTN.addEventListener('click', ()=>{
+  const v = AUTH_KEY_INPUT.value.trim();
+  if(!v){ ACCESS_LABEL.textContent = 'Operator-only'; ACCESS_LABEL.className='status-bad'; ownerAuthorized=false; logOp('No key presented'); toast('No key presented'); return; }
+  if(v === 'davidgomadza'){ ACCESS_LABEL.textContent = 'Owner: DavidGomadza'; ACCESS_LABEL.className='status-ok'; ownerAuthorized=true; logOp('Owner key presented — full calibration unlocked'); toast('Owner authorized'); }
+  else { ACCESS_LABEL.textContent = 'Operator-only'; ACCESS_LABEL.className='status-bad'; ownerAuthorized=false; logOp('Non-owner key presented — limited mode'); toast('Key accepted (limited)'); }
+});
+
+// ---------- Gate Visuals ----------
+function buildDiamonds(){
+  const diamondRing = document.getElementById('diamondRing');
+  diamondRing.innerHTML = '';
+  const diamondCount = 84;
+  const radius = 280;
+  for(let i=0;i<diamondCount;i++){
+    const a = (i/diamondCount)*Math.PI*2 - Math.PI/2;
+    const x = Math.cos(a)*(radius - 40);
+    const y = Math.sin(a)*(radius - 40);
+    const rot = (a*180/Math.PI)+90;
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('transform',`translate(${x},${y}) rotate(${rot})`);
+    g.classList.add('diamond');
+    const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttribute('points','0,-12 6,0 0,12 -6,0');
+    poly.setAttribute('fill','#8fbfe0');
+    poly.setAttribute('stroke','#6fa3bf');
+    poly.setAttribute('stroke-width','0.8');
+    g.appendChild(poly);
+    diamondRing.appendChild(g);
+  }
+}
+buildDiamonds();
+function spinDiamonds(on){
+  const nodes = document.querySelectorAll('.diamond');
+  nodes.forEach((n,i)=>{ if(on) setTimeout(()=> n.classList.add('spin'), i*6); else n.classList.remove('spin'); });
+}
+
+// Gate state
+let gateState = { travelerOnPlate:false, saidAGT:false, calibrating:false };
+document.getElementById('standBtn').addEventListener('click', ()=>{
+  gateState.travelerOnPlate = !gateState.travelerOnPlate;
+  const plate = document.getElementById('marsPlate').querySelector('circle');
+  plate.setAttribute('fill', gateState.travelerOnPlate ? '#f0f8ff' : '#ffffff');
+  logOp(gateState.travelerOnPlate ? 'Traveler stood on plate' : 'Traveler stepped off');
+});
+document.getElementById('sayBtn').addEventListener('click', ()=>{ gateState.saidAGT = true; logOp('Activation word "agt" spoken'); toast('agt detected'); });
+
+document.getElementById('calibrateBtn').addEventListener('click', ()=>{
+  const mode = document.getElementById('modeSelect').value;
+  let longago = parseInt(document.getElementById('longagoSec').value) || 12;
+  if(!ownerAuthorized && longago < 12){ longago = 12; document.getElementById('longagoSec').value = '12'; logOp('Longago enforced to 12s (no owner)'); }
+  const dep = document.getElementById('depYear').value || '0';
+  const arr = document.getElementById('arrYear').value || '7890867890';
+  const vel = parseFloat(document.getElementById('vel').value) || 1;
+  document.getElementById('velDisplay').textContent = vel + ' years/sec';
+  document.getElementById('depDisplay').textContent = dep;
+  document.getElementById('arrDisplay').textContent = arr;
+  logOp('Calibration: dep=' + dep + ' arr=' + arr + ' vel=' + vel + ' y/s');
+  gateState.calibrating = true;
+  spinDiamonds(true);
+  document.getElementById('portalShimmer').style.opacity = '0.6';
+  setTimeout(()=>{ if(gateState.calibrating){ logOp('Calibration complete — ready'); toast('Calibration complete'); } }, 1600);
+});
+document.getElementById('stopBtn').addEventListener('click', ()=>{ gateState.calibrating=false; spinDiamonds(false); document.getElementById('portalShimmer').style.opacity='0'; logOp('Calibration aborted'); toast('Stopped'); });
+
+document.getElementById('transitBtn').addEventListener('click', ()=>{
+  if(!gateState.travelerOnPlate){ toast('No traveler on plate'); logOp('Transit denied: no traveler'); return; }
+  if(!gateState.saidAGT){ toast('Activation word not spoken'); logOp('Transit denied: activation word missing'); return; }
+  const longago = parseInt(document.getElementById('longagoSec').value) || 12;
+  if(!ownerAuthorized){
+    toast('Commencing longago wait: ' + longago + 's'); logOp('Enforcing longago: ' + longago + 's');
+    setTimeout(()=> performTransit(), longago*1000);
+  } else { logOp('Owner present: bypass longago'); performTransit(); }
+});
+function performTransit(){
+  document.getElementById('portalShimmer').style.opacity = '1';
+  spinDiamonds(true);
+  logOp('Initiating transit sequence...');
+  toast('Transit started');
+  setTimeout(()=>{ logOp('Transit complete (UI) — arrival reached'); toast('Transit complete'); document.getElementById('portalShimmer').style.opacity = '0'; spinDiamonds(false); }, 1800);
+}
+
+// ---------- Brain Reader Logic ----------
+let brainCalibrated = false;
+const brainTerminal = document.getElementById('brainTerminal');
+
+function logBrain(msg) {
+  brainTerminal.innerHTML += '> ' + msg + '<br>';
+  brainTerminal.scrollTop = brainTerminal.scrollHeight;
+}
+
+function calibrateBrain() {
+  const input = document.getElementById('brainInput').value.trim();
+  if (input.toLowerCase() === "my voice is my password") {
+    brainCalibrated = true;
+    logBrain('✅ Calibration successful! Neural control enabled.');
+    toast('Brain reader calibrated');
+  } else {
+    logBrain('❌ Calibration failed. Say: "My voice is my password"');
+  }
+}
+
+function processThought() {
+  const thought = document.getElementById('brainInput').value.trim();
+  if (!thought) {
+    logBrain('⚠️ Enter a thought first');
+    return;
+  }
+  
+  if (!brainCalibrated) {
+    logBrain('⚠️ Calibrate first with "My voice is my password"');
+    return;
+  }
+  
+  logBrain(`Processing: "${thought}"`);
+  // Simulate decoding
+  setTimeout(() => {
+    const decoded = `Decoded: [${thought.toUpperCase()}]`;
+    logBrain(decoded);
+  }, 800);
+}
+
+function sendToTimeMachine() {
+  const thought = document.getElementById('brainInput').value.trim();
+  if (!thought) {
+    logBrain('⚠️ Enter a thought to send');
+    return;
+  }
+  
+  if (!brainCalibrated) {
+    logBrain('⚠️ Calibrate first');
+    return;
+  }
+  
+  // Parse thought for time travel commands
+  if (thought.toLowerCase().includes("mars")) {
+    document.getElementById('modeSelect').value = 'custom';
+    document.getElementById('arrYear').value = '2025';
+    logBrain('🚀 Command: Send to Mars');
+    toast('Mars command sent to gate');
+  } else if (thought.includes("-")) {
+    // Assume negative year = past
+    document.getElementById('modeSelect').value = 'past';
+    document.getElementById('arrYear').value = thought;
+    logBrain(`⏪ Command: Travel to year ${thought}`);
+    toast('Time travel command sent');
+  } else if (!isNaN(thought)) {
+    document.getElementById('modeSelect').value = 'future';
+    document.getElementById('arrYear').value = thought;
+    logBrain(`⏩ Command: Travel to year ${thought}`);
+    toast('Time travel command sent');
+  } else {
+    logBrain('❓ Unknown command. Try "mars" or a year like "2050" or "-10000"');
+  }
+}
+
+// ---------- AugVT & Mars client (same as original) ----------
+function getContacts(){ try{ return JSON.parse(localStorage.getItem('augvt_contacts')||'[]'); }catch{return [];} }
+function getChats(){ try{ return JSON.parse(localStorage.getItem('augvt_chats')||'{}'); }catch{return {};} }
+let contacts = getContacts(), chats = getChats();
+function renderContacts(){ const el = document.getElementById('contacts'); el.innerHTML=''; contacts.forEach(c=>{ const d = document.createElement('div'); d.className='contact'; d.textContent = c.name + ' — ' + c.token; d.addEventListener('click', ()=>{ openChat(c.id); document.querySelectorAll('.contact').forEach(x=>x.classList.remove('active')); d.classList.add('active'); }); el.appendChild(d); }); }
+renderContacts();
+document.getElementById('addContact').addEventListener('click', ()=>{ const name = document.getElementById('contactName').value.trim(); if(!name) return alert('Enter contact name'); const id = 'C-'+Math.random().toString(36).slice(2,8); const token = 'CT-'+Math.random().toString(36).slice(2,8); contacts.push({id,name,token}); localStorage.setItem('augvt_contacts', JSON.stringify(contacts)); renderContacts(); document.getElementById('contactName').value=''; toast('Contact added'); });
+document.getElementById('regenToken').addEventListener('click', ()=>{ const t = 'AUGVT-'+Math.random().toString(36).slice(2,10).toUpperCase(); localStorage.setItem('augvt_token', t); document.getElementById('myToken').value = t; toast('Token regenerated'); });
+document.getElementById('myToken').value = localStorage.getItem('augvt_token') || ('AUGVT-'+Math.random().toString(36).slice(2,10).toUpperCase());
+
+function openChat(id){ const c = contacts.find(x=>x.id===id); if(!c) return; document.getElementById('curContact').textContent = c.name; const msgs = chats[id] || []; const view = document.getElementById('messages'); view.innerHTML=''; msgs.forEach(m=> appendMessageView(m)); window.currentChat = id; }
+function appendMessageView(m){ const box = document.getElementById('messages'); const r = document.createElement('div'); r.style.textAlign = m.out ? 'right' : 'left'; const s = document.createElement('span'); s.textContent = m.text; s.style.display='inline-block'; s.style.padding='6px'; s.style.borderRadius='8px'; s.style.background = m.out ? '#d9f0e6' : '#f0f8ff'; s.style.color='#062033'; r.appendChild(s); box.appendChild(r); box.scrollTop = box.scrollHeight; }
+document.getElementById('sendBtn').addEventListener('click', ()=>{ const txt = document.getElementById('msgInput').value.trim(); if(!txt) return; if(!window.currentChat) return alert('Open a contact first'); const id = window.currentChat; if(!chats[id]) chats[id]=[]; chats[id].push({text:txt,out:true,time:Date.now()}); localStorage.setItem('augvt_chats', JSON.stringify(chats)); appendMessageView({text:txt,out:true}); document.getElementById('msgInput').value=''; toast('Sent'); });
+
+document.getElementById('sendMars').addEventListener('click', ()=>{ const txt = document.getElementById('msgInput').value.trim(); if(!txt) return; const from = window.currentChat || 'operator'; const key = 'mars_inbox_' + '000888888888888888886789028678902867890286789028678888888777666555444333222111000867810236782345678901'; let inbox = []; try{ inbox = JSON.parse(localStorage.getItem(key)||'[]'); }catch(e){ inbox = []; } inbox.unshift({id:'m-'+Math.random().toString(36).slice(2,9), time:Date.now(), payload:{from,text:txt}}); localStorage.setItem(key, JSON.stringify(inbox)); document.getElementById('msgInput').value=''; toast('Queued to Mars'); renderMarsInbox(); });
+
+function readMarsInbox(){ try{ return JSON.parse(localStorage.getItem('mars_inbox_' + '000888888888888888886789028678902867890286789028678888888777666555444333222111000867810236782345678901')||'[]'); }catch{return [];} }
+function renderMarsInbox(){ const view = document.getElementById('marsInbox'); const inbox = readMarsInbox(); if(inbox.length===0){ view.textContent='No messages queued to Mars.'; return;} view.innerHTML=''; inbox.forEach(m=>{ const d = document.createElement('div'); d.style.marginBottom='8px'; d.innerHTML = '<div style="font-size:12px;color:#516b86">['+ new Date(m.time).toLocaleString() +']</div><div>'+ JSON.stringify(m.payload) +'</div>'; view.appendChild(d); }); }
+renderMarsInbox();
+
+let marsTimer = null;
+document.getElementById('startMarsClient').addEventListener('click', ()=>{
+  const btn = document.getElementById('startMarsClient');
+  if(marsTimer){ clearInterval(marsTimer); marsTimer=null; btn.textContent='Start Mars Client'; toast('Mars client stopped'); return; }
+  btn.textContent='Stop Mars Client'; toast('Mars client started');
+  let lastLen = readMarsInbox().length;
+  marsTimer = setInterval(()=>{ const inbox = readMarsInbox(); if(inbox.length > lastLen){ const newOnes = inbox.slice(0, inbox.length - lastLen); newOnes.forEach((m, idx)=>{ const delay = 8000 + idx*1200; setTimeout(()=>{ const repliesKey = 'mars_inbox_' + '000888888888888888886789028678902867890286789028678888888777666555444333222111000867810236782345678901' + '_replies'; let replies = []; try{ replies = JSON.parse(localStorage.getItem(repliesKey)||'[]'); }catch(e){ replies = []; } replies.unshift({id:'r-'+Math.random().toString(36).slice(2,9), time:Date.now(), payload:{from:'MarsClient', text:'Message received on Mars — arrival confirmed', original:m.payload}}); localStorage.setItem(repliesKey, JSON.stringify(replies)); toast('Mars auto-reply queued'); }, delay); }); lastLen = inbox.length; renderMarsInbox(); } }, 2500);
+});
+
+document.getElementById('checkReplies').addEventListener('click', ()=>{ const key = 'mars_inbox_' + '000888888888888888886789028678902867890286789028678888888777666555444333222111000867810236782345678901' + '_replies'; const r = JSON.parse(localStorage.getItem(key) || '[]'); alert('Replies: ' + r.length); });
+
+// WebRTC scaffolding (same as original)
+let pc=null, dc=null;
+document.getElementById('createOffer').addEventListener('click', async ()=>{
+  pc = new RTCPeerConnection();
+  dc = pc.createDataChannel('augvt');
+  dc.onopen = ()=> toast('Datachannel open');
+  dc.onmessage = (e)=> { try{ const d = JSON.parse(e.data); if(d.type==='chat'){ const id = d.contactId || 'peer'; if(!chats[id]) chats[id]=[]; chats[id].push({text:d.text,out:false,time:Date.now()}); localStorage.setItem('augvt_chats', JSON.stringify(chats)); if(window.currentChat===id) openChat(id); toast('DC chat received'); } }catch(e){ toast('DC msg: '+e.data);} };
+  try{ const stream = await navigator.mediaDevices.getUserMedia({audio:true}); stream.getTracks().forEach(t=>pc.addTrack(t, stream)); }catch(e){}
+  const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
+  document.getElementById('sdpOffer').value = JSON.stringify(pc.localDescription);
+  toast('Offer created — copy SDP');
+});
+document.getElementById('acceptOffer').addEventListener('click', async ()=>{ const t = document.getElementById('sdpOffer').value.trim(); if(!t) return alert('Paste Offer first'); const offer = JSON.parse(t); pc = new RTCPeerConnection(); pc.ondatachannel = (ev)=>{ dc = ev.channel; dc.onmessage = (e)=> toast('DC recv: '+e.data); dc.onopen = ()=> toast('DC open'); }; pc.ontrack = (ev)=>{ const audio = document.getElementById('remoteAudio'); audio.srcObject = ev.streams[0]; audio.play().catch(()=>{}); }; await pc.setRemoteDescription(offer); try{ const stream = await navigator.mediaDevices.getUserMedia({audio:true}); stream.getTracks().forEach(t=>pc.addTrack(t, stream)); }catch(e){} const answer = await pc.createAnswer(); await pc.setLocalDescription(answer); document.getElementById('sdpAnswer').value = JSON.stringify(pc.localDescription); toast('Answer created — paste back to offerer'); });
+document.getElementById('acceptAnswer').addEventListener('click', async ()=>{ const t = document.getElementById('sdpAnswer').value.trim(); if(!t) return alert('Paste Answer first'); if(!pc) return toast('No offerer pc'); await pc.setRemoteDescription(JSON.parse(t)); toast('Answer accepted'); });
+document.getElementById('sendDataTest').addEventListener('click', ()=>{ if(!dc || dc.readyState!=='open') return alert('Datachannel not open'); const payload = { type:'chat', contactId: window.currentChat || 'peer', text: 'Hello from datachannel' }; dc.send(JSON.stringify(payload)); toast('Sent DC test'); });
+
+// Operator log helpers
+function logOp(text){
+  const el = document.getElementById('opLog');
+  const entry = '[' + new Date().toUTCString() + '] ' + text;
+  el.textContent = entry + '\n' + el.textContent;
+}
+function toast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg; t.style.position='fixed'; t.style.right='18px'; t.style.bottom='18px'; t.style.background='rgba(6,32,58,0.9)'; t.style.color='white'; t.style.padding='8px 10px'; t.style.borderRadius='8px'; t.style.zIndex=9999;
+  document.body.appendChild(t);
+  setTimeout(()=> t.remove(), 2500);
+}
+
+logOp('Neural Time Machine initialized. Calibrate brain reader to control gate.');
+</script>
+</body>
+</html>
+
